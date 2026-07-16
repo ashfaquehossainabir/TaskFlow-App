@@ -1,101 +1,141 @@
-import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
-import "../styles/Sidebar.css";
+import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import ActiveTimerBar from './ActiveTimerBar';
+import ThemeToggle from './ThemeToggle';
+import Modal from './Modal';
+import { canManageTasks } from '../utils/roles';
 
-export default function Sidebar({ open, onClose }) {
+const linkStyle = ({ isActive }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  padding: '10px 14px',
+  borderRadius: 8,
+  fontSize: 14,
+  fontWeight: 500,
+  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+  background: isActive ? 'var(--bg-panel-raised)' : 'transparent',
+  border: isActive ? '1px solid var(--border-hairline)' : '1px solid transparent',
+});
+
+// isOpen / onClose control the mobile slide-in drawer. On desktop the
+// sidebar is always visible and these props have no visual effect.
+export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
-  const isAdmin = user?.role === "admin";
-  const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+  const isAdmin = user?.role === 'admin';
+  const isManager = canManageTasks(user?.role);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  // Auto-close the mobile drawer whenever the user navigates to a new page.
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") setShowLogoutConfirm(false);
-    };
-
-    if (showLogoutConfirm) {
-      window.addEventListener("keydown", onKey);
-    }
-
-    return () => window.removeEventListener("keydown", onKey);
-  }, [showLogoutConfirm]);
+    onClose && onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <>
-      {/* MOBILE OVERLAY */}
-      <div
-        className={`sidebar-overlay ${open ? "show" : ""}`}
-        onClick={onClose}
-      />
+      {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
 
-      <aside className={`sidebar ${open ? "open" : ""}`}>
-        {/* HEADER */}
-        <div className="sidebar-header">
-          <div className="brand">
-            <div className="brand-logo">T</div>
-            <span className="brand-name">TaskFlow</span>
+      <aside className={`sidebar${isOpen ? ' sidebar-open' : ''}`}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 26px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 7,
+                background: 'linear-gradient(135deg, var(--accent-cyan), var(--status-progress))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                fontSize: 13,
+                color: '#0b1017',
+              }}
+            >
+              T
+            </div>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, letterSpacing: '-0.01em' }}>
+              TaskFlow
+            </span>
           </div>
-
-          <button className="close-btn" onClick={onClose} aria-label="Close menu">
-            ✕
+          <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">
+            ×
           </button>
         </div>
 
-        {/* NAV */}
-        <nav className="sidebar-wrapper">
-          <div className="sidebar-nav navlinks">
-            <NavLink to="/" end className="nav-link">
-              Overview
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <NavLink to="/" end style={linkStyle}>
+            Overview
+          </NavLink>
+          <NavLink to="/projects" style={linkStyle}>
+            Projects
+          </NavLink>
+          <NavLink to="/tasks" style={linkStyle}>
+            {isManager ? 'All Tasks' : 'My Tasks'}
+          </NavLink>
+          <NavLink to="/kanban" style={linkStyle}>
+            Kanban Board
+          </NavLink>
+          <NavLink to="/calendar" style={linkStyle}>
+            Calendar
+          </NavLink>
+          <NavLink to="/deadlines" style={linkStyle}>
+            Deadline Watch
+          </NavLink>
+          {isAdmin && (
+            <NavLink to="/users" style={linkStyle}>
+              Team &amp; Access
             </NavLink>
-
-            <NavLink to="/tasks" className="nav-link">
-              {isAdmin ? "All Tasks" : "My Tasks"}
+          )}
+          {isManager && (
+            <NavLink to="/employee-stats" style={linkStyle}>
+              {isAdmin ? 'Employee Stats' : 'My Team'}
             </NavLink>
-
-            <NavLink to="/deadlines" className="nav-link">
-              Deadline Watch
-            </NavLink>
-
-            <NavLink to="/pending" className="nav-link">
-              Pending Tasks
-            </NavLink>
-
-            {isAdmin && (
-              <NavLink to="/users" className="nav-link">
-                Team &amp; Access
-              </NavLink>
-            )}
-
-            {isAdmin && (
-              <NavLink to="/employee-stats" className="nav-link">
-                Employee Stats
-              </NavLink>
-            )}
-          </div>
-
-          <button className="theme-toggle" onClick={toggleTheme}>
-            {theme === "dark" ? "🌙 Dark mode" : "☀️ Light mode"}
-          </button>
+          )}
         </nav>
 
-        {/* FOOTER */}
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <span className="user-name">{user?.name}</span>
+        <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border-hairline-soft)' }}>
+          <ActiveTimerBar />
+          <div style={{ marginBottom: 10 }}>
+            <ThemeToggle />
+          </div>
+          <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{user?.name}</span>
             <span
-              className={`user-role ${
-                user?.role === "admin" ? "admin" : ""
-              }`}
+              className="mono"
+              style={{
+                fontSize: 11,
+                color:
+                  user?.role === 'admin'
+                    ? 'var(--accent-cyan)'
+                    : user?.role === 'manager'
+                    ? 'var(--status-hold)'
+                    : 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}
             >
               {user?.role}
             </span>
           </div>
-
           <button
-            className="logout-btn"
             onClick={() => setShowLogoutConfirm(true)}
+            style={{
+              width: '100%',
+              marginTop: 8,
+              padding: '9px 12px',
+              borderRadius: 8,
+              background: 'transparent',
+              border: '1px solid var(--border-hairline)',
+              color: 'var(--text-secondary)',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
           >
             Sign out
           </button>
@@ -103,39 +143,99 @@ export default function Sidebar({ open, onClose }) {
       </aside>
 
       {showLogoutConfirm && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowLogoutConfirm(false)}
-        >
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <h3>Sign out?</h3>
-            <p>
-              Are you sure you want to sign out of your account?
-            </p>
-
-            <div className="modal-actions">
-              <button
-                className="modal-btn secondary"
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="modal-btn danger"
-                onClick={logout}
-              >
-                Sign out
-              </button>
-            </div>
+        <Modal title="Sign out?" onClose={() => setShowLogoutConfirm(false)} width={360}>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 0, marginBottom: 20 }}>
+            You'll need to log back in with your email and password to continue.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <button
+              onClick={() => setShowLogoutConfirm(false)}
+              style={{
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-hairline)',
+                borderRadius: 8,
+                padding: '9px 16px',
+                fontSize: 13.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={logout}
+              style={{
+                background: 'var(--status-cancelled)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '9px 16px',
+                fontSize: 13.5,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Sign out
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
+
+      <style>{`
+        .sidebar {
+          width: 232px;
+          flex-shrink: 0;
+          background: var(--bg-panel);
+          border-right: 1px solid var(--border-hairline-soft);
+          display: flex;
+          flex-direction: column;
+          padding: 20px 14px;
+          height: 100vh;
+          position: sticky;
+          top: 0;
+        }
+        .sidebar-close-btn {
+          display: none;
+          background: transparent;
+          border: none;
+          color: var(--text-muted);
+          font-size: 22px;
+          line-height: 1;
+          cursor: pointer;
+          padding: 4px 8px;
+        }
+        .sidebar-overlay {
+          display: none;
+        }
+        @media (max-width: 900px) {
+          .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 210;
+            box-shadow: 20px 0 45px rgba(0, 0, 0, 0.45);
+          }
+          .sidebar-open {
+            transform: translateX(0);
+          }
+          .sidebar-close-btn {
+            display: inline-flex;
+          }
+          .sidebar-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: var(--overlay-scrim);
+            z-index: 200;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sidebar { transition: none; }
+        }
+      `}</style>
     </>
   );
 }

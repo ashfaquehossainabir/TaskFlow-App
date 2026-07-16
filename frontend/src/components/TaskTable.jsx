@@ -54,7 +54,7 @@ export default function TaskTable({ tasks, isAdmin, onStatusChange, onEdit, onDe
         .task-row:hover { background: var(--bg-panel-raised); }
       `}</style>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', minWidth: 720, borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={thStyle}>Task</th>
@@ -68,7 +68,7 @@ export default function TaskTable({ tasks, isAdmin, onStatusChange, onEdit, onDe
           </thead>
           <tbody>
             {tasks.map((task) => (
-              <tr 
+              <tr
                 key={task._id}
                 onClick={() => onRowClick && onRowClick(task)}
                 style={onRowClick ? { cursor: 'pointer' } : undefined}
@@ -104,7 +104,7 @@ export default function TaskTable({ tasks, isAdmin, onStatusChange, onEdit, onDe
                       border: '1px solid var(--border-hairline)',
                     }}
                   >
-                    {task.projectName}
+                    {task.project?.name || '—'}
                   </span>
                 </td>
                 {isAdmin && (

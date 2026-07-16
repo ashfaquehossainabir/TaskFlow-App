@@ -4,10 +4,11 @@ import TaskTable from '../components/TaskTable';
 import TaskDetailModal from '../components/TaskDetailModal';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { canManageTasks } from '../utils/roles';
 
 export default function DeadlineWatch() {
   const { user } = useAuth();
-  const isAdmin = user.role === 'admin';
+  const isAdmin = canManageTasks(user.role);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detailTaskId, setDetailTaskId] = useState(null);
@@ -56,10 +57,10 @@ export default function DeadlineWatch() {
           borderRadius: 10,
           marginBottom: 22,
           fontSize: 13.5,
-          color: '#ffb454',
+          color: 'var(--text-warning)',
         }}
       >
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ffb454', flexShrink: 0 }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--text-warning)', flexShrink: 0 }} />
         {loading
           ? 'Checking deadlines…'
           : `${tasks.length} task${tasks.length === 1 ? '' : 's'} ${isAdmin ? 'across the team' : 'assigned to you'} need attention.`}

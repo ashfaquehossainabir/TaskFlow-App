@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import PageShell from '../components/PageShell';
 import EmployeeStatCard from '../components/EmployeeStatCard';
+import EmployeeTasksModal from '../components/EmployeeTasksModal';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export default function EmployeeStats() {
+  const { user } = useAuth();
+  const isAdmin = user.role === 'admin';
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -18,15 +23,18 @@ export default function EmployeeStats() {
   }, []);
 
   return (
-    <PageShell title="Employee Stats" subtitle="Task load and status breakdown for every employee.">
-      {loading && <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading employee stats…</div>}
+    <PageShell
+      title={isAdmin ? 'Employee Stats' : 'My Team'}
+      subtitle={isAdmin ? 'Task load and status breakdown for every employee.' : 'Task load and status breakdown for your team.'}
+    >
+      {loading && <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading team stats…</div>}
 
       {error && (
         <div
           style={{
             background: 'rgba(239, 100, 97, 0.1)',
             border: '1px solid rgba(239, 100, 97, 0.35)',
-            color: '#ff8a85',
+            color: 'var(--text-error)',
             padding: '10px 12px',
             borderRadius: 8,
             fontSize: 13,
@@ -47,23 +55,34 @@ export default function EmployeeStats() {
             fontSize: 14,
           }}
         >
-          No employee accounts yet. Create one from Team &amp; Access.
+          {isAdmin ? 'No employee accounts yet. Create one from Team & Access.' : 'No employees report to you yet.'}
         </div>
       )}
 
       {!loading && !error && employees.length > 0 && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 16,
-          }}
-        >
+        <div className="employee-stats-grid">
           {employees.map((emp) => (
-            <EmployeeStatCard key={emp._id} employee={emp} />
+            <EmployeeStatCard key={emp._id} employee={emp} onClick={() => setSelectedEmployee(emp)} />
           ))}
         </div>
       )}
+
+      {selectedEmployee && (
+        <EmployeeTasksModal employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />
+      )}
+
+      <style>{`
+        .employee-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+        }
+        @media (max-width: 480px) {
+          .employee-stats-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </PageShell>
   );
 }

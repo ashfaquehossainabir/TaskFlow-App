@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from './Modal';
 import { fieldWrap, labelStyle, inputStyle, primaryBtn, secondaryBtn, errorBanner } from './formStyles';
 
-export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
+export default function UserFormModal({ user, managers, onClose, onSaved, onSubmit }) {
   const isEdit = Boolean(user);
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -10,13 +10,20 @@ export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
     password: '',
     role: user?.role || 'employee',
     department: user?.department || '',
+    manager: user?.manager || '',
     isActive: user?.isActive ?? true,
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   const update = (key) => (e) =>
-    setForm((f) => ({ ...f, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+    setForm((f) => ({
+      ...f,
+      [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
+      // Manager assignment only makes sense for employees - clear it out
+      // the moment the role changes to anything else.
+      ...(key === 'role' && e.target.value !== 'employee' ? { manager: '' } : {}),
+    }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +34,7 @@ export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
     }
     setSaving(true);
     try {
-      const payload = { ...form };
+      const payload = { ...form, manager: form.role === 'employee' ? form.manager || null : null };
       if (isEdit && !payload.password) delete payload.password;
       await onSubmit(payload, user?._id);
       onSaved();
@@ -40,6 +47,18 @@ export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
 
   return (
     <Modal title={isEdit ? 'Edit user' : 'Create new user'} onClose={onClose} width={460}>
+      <style>{`
+        .form-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        @media (max-width: 480px) {
+          .form-grid-2 {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
       <form onSubmit={handleSubmit}>
         {error && <div style={errorBanner}>{error}</div>}
 
@@ -58,11 +77,12 @@ export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
           <input type="password" style={inputStyle} value={form.password} onChange={update('password')} placeholder="Min. 6 characters" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="form-grid-2">
           <div style={fieldWrap}>
             <label style={labelStyle}>Role</label>
             <select style={inputStyle} value={form.role} onChange={update('role')}>
               <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -71,6 +91,20 @@ export default function UserFormModal({ user, onClose, onSaved, onSubmit }) {
             <input style={inputStyle} value={form.department} onChange={update('department')} placeholder="e.g. Engineering" />
           </div>
         </div>
+
+        {form.role === 'employee' && (
+          <div style={fieldWrap}>
+            <label style={labelStyle}>Reports to (manager)</label>
+            <select style={inputStyle} value={form.manager || ''} onChange={update('manager')}>
+              <option value="">No manager assigned</option>
+              {managers.map((m) => (
+                <option key={m._id} value={m._id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {isEdit && (
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: 'var(--text-secondary)', marginBottom: 4 }}>
