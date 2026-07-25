@@ -12,9 +12,8 @@ const projectRoutes = require('./routes/projects');
 const timeEntryRoutes = require('./routes/timeEntries');
 const noticeRoutes = require('./routes/notices');
 
+const mongoose = require('mongoose');
 const app = express();
-
-connectDB();
 
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
@@ -28,8 +27,17 @@ app.use(
 );
 app.use(express.json());
 
+// Answers even before the DB is connected, so it works as a target for an
+// uptime pinger (e.g. cron-job.org) to keep a free-tier host from spinning
+// down in the first place. `db` reports whether Mongo is actually ready yet.
+// readyState: 0 disconnected, 1 connected, 2 connecting, 3 disconnecting
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  const dbStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  res.json({
+    status: 'ok',
+    db: dbStates[mongoose.connection.readyState] || 'unknown',
+    time: new Date().toISOString(),
+  });
 });
 
 app.use('/api/auth', authRoutes);
@@ -73,31 +81,48 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`TaskFlow API running on port ${PORT}`);
-});
 
-// Runs every day at the time set by REMINDER_CRON (default 10:00) in the
-// timezone set by REMINDER_TIMEZONE (default UTC), and emails every employee
-// who has a task due within REMINDER_DAYS_THRESHOLD days.
-//
-// Set ENABLE_INTERNAL_CRON=false if you're using an external scheduler like
-// cron-job.org to hit /api/cron/deadline-reminder instead (recommended on
-// Render's free tier, since a sleeping service can miss this internal timer).
-const REMINDER_CRON = process.env.REMINDER_CRON || '0 10 * * *';
-const REMINDER_TIMEZONE = process.env.REMINDER_TIMEZONE || 'UTC';
-const ENABLE_INTERNAL_CRON = process.env.ENABLE_INTERNAL_CRON !== 'false';
+// Waits for MongoDB before opening the port. Previously connectDB() was
+// fired without awaiting it and app.listen() ran immediately after, so on a
+// cold start (Render free tier spinning back up, or a fresh Atlas
+// connection) the server would start accepting requests before Mongoose had
+// finished connecting. Mongoose buffers those early queries and either they
+// resolve late or hit the buffering timeout - either way the client-facing
+// request can hang past whatever the browser/host proxy will wait for and
+// come back as a failed/timed-out request, even though the write goes on to
+// complete server-side once the connection finishes. Awaiting the connection
+// first removes that whole window.
+async function start() {
+  await connectDB();
 
-if (ENABLE_INTERNAL_CRON) {
-  cron.schedule(
-    REMINDER_CRON,
-    () => {
-      console.log('[deadline-reminder] Running scheduled deadline reminder job...');
-      runDeadlineReminderJob().catch((err) => console.error('[deadline-reminder] Job failed:', err.message));
-    },
-    { timezone: REMINDER_TIMEZONE }
-  );
-  console.log(`[deadline-reminder] Scheduled with cron "${REMINDER_CRON}" (timezone: ${REMINDER_TIMEZONE})`);
-} else {
-  console.log('[deadline-reminder] Internal cron disabled (ENABLE_INTERNAL_CRON=false) — relying on external trigger.');
+  app.listen(PORT, () => {
+    console.log(`TaskFlow API running on port ${PORT}`);
+  });
+
+  // Runs every day at the time set by REMINDER_CRON (default 10:00) in the
+  // timezone set by REMINDER_TIMEZONE (default UTC), and emails every employee
+  // who has a task due within REMINDER_DAYS_THRESHOLD days.
+  //
+  // Set ENABLE_INTERNAL_CRON=false if you're using an external scheduler like
+  // cron-job.org to hit /api/cron/deadline-reminder instead (recommended on
+  // Render's free tier, since a sleeping service can miss this internal timer).
+  const REMINDER_CRON = process.env.REMINDER_CRON || '0 10 * * *';
+  const REMINDER_TIMEZONE = process.env.REMINDER_TIMEZONE || 'UTC';
+  const ENABLE_INTERNAL_CRON = process.env.ENABLE_INTERNAL_CRON !== 'false';
+
+  if (ENABLE_INTERNAL_CRON) {
+    cron.schedule(
+      REMINDER_CRON,
+      () => {
+        console.log('[deadline-reminder] Running scheduled deadline reminder job...');
+        runDeadlineReminderJob().catch((err) => console.error('[deadline-reminder] Job failed:', err.message));
+      },
+      { timezone: REMINDER_TIMEZONE }
+    );
+    console.log(`[deadline-reminder] Scheduled with cron "${REMINDER_CRON}" (timezone: ${REMINDER_TIMEZONE})`);
+  } else {
+    console.log('[deadline-reminder] Internal cron disabled (ENABLE_INTERNAL_CRON=false) — relying on external trigger.');
+  }
 }
+
+start();

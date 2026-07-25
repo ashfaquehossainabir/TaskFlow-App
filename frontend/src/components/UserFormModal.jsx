@@ -55,7 +55,13 @@ export default function UserFormModal({ user, managers, currentUser, onClose, on
       await onSubmit(payload, user?._id);
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong while saving the user.');
+      if (err.isAmbiguousFailure) {
+        setError(
+          "Couldn't confirm this saved — the connection dropped or the server was waking up. Check the team list behind this window before retrying, it may have gone through."
+        );
+      } else {
+        setError(err.response?.data?.message || 'Something went wrong while saving the user.');
+      }
     } finally {
       setSaving(false);
     }

@@ -48,10 +48,17 @@ export default function Users() {
   }, [managers]);
 
   const handleSubmit = async (form, userId) => {
-    if (userId) {
-      await api.put(`/users/${userId}`, form);
-    } else {
-      await api.post('/users', form);
+    try {
+      if (userId) {
+        await api.put(`/users/${userId}`, form);
+      } else {
+        await api.post('/users', form);
+      }
+    } catch (err) {
+      if (err.isAmbiguousFailure) {
+        load();
+      }
+      throw err;
     }
   };
 

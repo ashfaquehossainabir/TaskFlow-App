@@ -75,10 +75,20 @@ export default function Tasks() {
   };
 
   const handleSubmit = async (form, taskId) => {
-    if (taskId) {
-      await api.put(`/tasks/${taskId}`, form);
-    } else {
-      await api.post('/tasks', form);
+    try {
+      if (taskId) {
+        await api.put(`/tasks/${taskId}`, form);
+      } else {
+        await api.post('/tasks', form);
+      }
+    } catch (err) {
+      if (err.isAmbiguousFailure) {
+        // The request may have actually succeeded server-side even though
+        // this response failed - refresh in the background so the list is
+        // accurate whether or not it did, without waiting for a manual reload.
+        loadTasks();
+      }
+      throw err;
     }
   };
 

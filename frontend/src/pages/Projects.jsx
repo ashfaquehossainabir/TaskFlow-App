@@ -37,10 +37,17 @@ export default function Projects() {
   }, [debouncedSearch]);
 
   const handleSubmit = async (form, projectId) => {
-    if (projectId) {
-      await api.put(`/projects/${projectId}`, form);
-    } else {
-      await api.post('/projects', form);
+    try {
+      if (projectId) {
+        await api.put(`/projects/${projectId}`, form);
+      } else {
+        await api.post('/projects', form);
+      }
+    } catch (err) {
+      if (err.isAmbiguousFailure) {
+        load();
+      }
+      throw err;
     }
   };
 

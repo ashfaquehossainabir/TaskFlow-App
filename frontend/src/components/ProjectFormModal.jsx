@@ -38,7 +38,13 @@ export default function ProjectFormModal({ project, onClose, onSaved, onSubmit }
       await onSubmit(form, project?._id);
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong while saving the project.');
+      if (err.isAmbiguousFailure) {
+        setError(
+          "Couldn't confirm this saved — the connection dropped or the server was waking up. Check the project list behind this window before retrying, it may have gone through."
+        );
+      } else {
+        setError(err.response?.data?.message || 'Something went wrong while saving the project.');
+      }
     } finally {
       setSaving(false);
     }
