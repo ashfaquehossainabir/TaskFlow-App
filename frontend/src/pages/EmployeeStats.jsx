@@ -18,12 +18,7 @@ export default function EmployeeStats() {
     api
       .get('/tasks/stats/by-employee')
       .then((res) => setEmployees(res.data))
-      .catch((err) =>
-        setError(
-          err.response?.data?.message ||
-            'Failed to load employee stats — the server may still be waking up. Please try again in a moment.'
-        )
-      )
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load employee stats.'))
       .finally(() => setLoading(false));
   }, []);
 

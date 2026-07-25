@@ -53,13 +53,7 @@ export default function TaskFormModal({ task, employees, projects, onClose, onSa
       await onSubmit(payload, task?._id);
       onSaved();
     } catch (err) {
-      if (err.isAmbiguousFailure) {
-        setError(
-          "Couldn't confirm this saved — the connection dropped or the server was waking up. Check the task list behind this window before retrying, it may have gone through."
-        );
-      } else {
-        setError(err.response?.data?.message || 'Something went wrong while saving the task.');
-      }
+      setError(err.response?.data?.message || 'Something went wrong while saving the task.');
     } finally {
       setSaving(false);
     }
