@@ -1,3 +1,5 @@
+import { formatMoney, exactMoney } from '../utils/currency';
+
 const MINI_STATS = [
   { key: 'todo', label: 'To Do', color: 'var(--status-todo)' },
   { key: 'in-progress', label: 'In Progress', color: 'var(--status-progress)' },
@@ -74,7 +76,7 @@ export default function EmployeeStatCard({ employee, onClick }) {
           <>
             <div className="esc-divider" />
             <div className="esc-headline-item">
-              <div className="esc-headline-value mono">${target.toLocaleString()}</div>
+              <div className="esc-headline-value mono" title={exactMoney(target)}>${formatMoney(target)}</div>
               <div className="esc-headline-label">Min. Target</div>
             </div>
           </>
@@ -111,14 +113,22 @@ export default function EmployeeStatCard({ employee, onClick }) {
         <div className="esc-section-title">Value Delivered</div>
         <div className="esc-value-grid">
           <div className="esc-value-item">
-            <div className="esc-value-amount mono" style={{ color: 'var(--status-progress)' }}>
-              ${Number(employee.inProgressValue ?? 0).toLocaleString()}
+            <div
+              className="esc-value-amount mono"
+              style={{ color: 'var(--status-progress)' }}
+              title={exactMoney(employee.inProgressValue ?? 0)}
+            >
+              ${formatMoney(employee.inProgressValue ?? 0)}
             </div>
             <div className="esc-value-label">In Progress</div>
           </div>
           <div className="esc-value-item">
-            <div className="esc-value-amount mono" style={{ color: 'var(--status-delivered)' }}>
-              ${deliveredValue.toLocaleString()}
+            <div
+              className="esc-value-amount mono"
+              style={{ color: 'var(--status-delivered)' }}
+              title={exactMoney(deliveredValue)}
+            >
+              ${formatMoney(deliveredValue)}
             </div>
             <div className="esc-value-label">Delivered</div>
           </div>
@@ -136,8 +146,12 @@ export default function EmployeeStatCard({ employee, onClick }) {
               />
             </div>
             <div className="esc-progress-caption">
-              <span style={{ color: achieved ? 'var(--status-delivered)' : 'var(--text-secondary)' }}>
-                {achieved ? 'Target achieved' : `$${remaining.toLocaleString()} remaining`}
+              <span
+                className="esc-progress-remaining"
+                style={{ color: achieved ? 'var(--status-delivered)' : 'var(--text-secondary)' }}
+                title={achieved ? undefined : exactMoney(remaining)}
+              >
+                {achieved ? 'Target achieved' : `$${formatMoney(remaining)} remaining`}
               </span>
               <span className="mono">{Math.round(progressPct)}%</span>
             </div>
@@ -322,6 +336,7 @@ export default function EmployeeStatCard({ employee, onClick }) {
           border: 1px solid var(--border-hairline-soft);
           border-radius: 8px;
           padding: 8px 10px;
+          min-width: 0;
         }
         .esc-value-amount {
           font-size: 15.5px;
@@ -329,6 +344,7 @@ export default function EmployeeStatCard({ employee, onClick }) {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          max-width: 100%;
         }
         .esc-value-label {
           font-size: 10.5px;
@@ -357,8 +373,15 @@ export default function EmployeeStatCard({ employee, onClick }) {
           display: flex;
           justify-content: space-between;
           align-items: baseline;
+          gap: 8px;
           font-size: 11px;
           color: var(--text-muted);
+        }
+        .esc-progress-remaining {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       `}</style>
     </div>
