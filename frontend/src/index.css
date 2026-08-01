@@ -27,6 +27,7 @@
   --text-info: #7ec8ff;
 
   --overlay-scrim: rgba(6, 9, 13, 0.65);
+  --shadow-card-hover: 0 10px 24px -12px rgba(0, 0, 0, 0.35);
 
   --chip-overdue-bg: rgba(239, 100, 97, 0.14);
   --chip-overdue-border: rgba(239, 100, 97, 0.4);
@@ -74,6 +75,7 @@
   --text-info: #1d4ed8;
 
   --overlay-scrim: rgba(23, 31, 39, 0.5);
+  --shadow-card-hover: 0 10px 20px -14px rgba(23, 31, 39, 0.22);
 
   --chip-overdue-bg: rgba(214, 71, 63, 0.2);
   --chip-overdue-border: rgba(214, 71, 63, 0.55);

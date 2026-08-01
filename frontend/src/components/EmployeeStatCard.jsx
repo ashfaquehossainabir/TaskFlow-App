@@ -208,7 +208,7 @@ export default function EmployeeStatCard({ employee, onClick }) {
           transform: translateY(-2px);
           border-color: var(--border-hairline);
           background: var(--bg-panel-raised);
-          box-shadow: 0 10px 24px -12px rgba(0,0,0,0.35);
+          box-shadow: var(--shadow-card-hover);
         }
 
         .esc-header {
