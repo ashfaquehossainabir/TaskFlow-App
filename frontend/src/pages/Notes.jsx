@@ -126,7 +126,7 @@ export default function Notes() {
           }}
         >
           {notes.map((n) => (
-            <div key={n._id} onClick={() => openNote(n)} className="project-card">
+            <div key={n._id} onClick={() => openNote(n)} className="project-card note-card">
               <div
                 style={{
                   display: 'flex',
@@ -225,6 +225,18 @@ export default function Notes() {
           onDeleted={handleDeleted}
         />
       )}
+
+      <style>{`
+        .note-card {
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        [data-theme='light'] .note-card:hover {
+          background: var(--bg-panel);
+          border-color: var(--border-hairline);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+      `}</style>
     </PageShell>
   );
 }

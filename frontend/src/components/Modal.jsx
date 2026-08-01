@@ -16,6 +16,7 @@ export default function Modal({ title, onClose, children, width = 480 }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        className="app-modal-box"
         style={{
           width: '100%',
           maxWidth: width,
@@ -70,6 +71,11 @@ export default function Modal({ title, onClose, children, width = 480 }) {
           {children}
         </div>
       </div>
+      <style>{`
+        [data-theme='light'] .app-modal-box {
+          background: var(--bg-panel) !important;
+        }
+      `}</style>
     </div>
   );
 }
