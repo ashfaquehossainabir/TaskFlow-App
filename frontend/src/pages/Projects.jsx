@@ -226,9 +226,18 @@ export default function Projects() {
       )}
 
       <style>{`
+        .project-card {
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
         .project-card:hover {
           background: var(--bg-panel-raised);
           border-color: var(--border-hairline);
+        }
+        [data-theme='light'] .project-card:hover {
+          background: var(--bg-panel);
+          border-color: var(--border-hairline);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
       `}</style>
 
