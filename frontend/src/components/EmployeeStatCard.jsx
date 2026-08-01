@@ -210,6 +210,9 @@ export default function EmployeeStatCard({ employee, onClick }) {
           background: var(--bg-panel-raised);
           box-shadow: var(--shadow-card-hover);
         }
+        [data-theme='light'] .employee-stat-card:hover {
+          background: var(--bg-panel);
+        }
 
         .esc-header {
           display: flex;
