@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 700,
                 fontSize: 13,
-                color: '#0b1017',
+                color: 'var(--text-on-accent)',
               }}
             >
               T
@@ -85,6 +85,9 @@ export default function Sidebar({ isOpen, onClose }) {
           </NavLink>
           <NavLink to="/deadlines" style={linkStyle}>
             Deadline Watch
+          </NavLink>
+          <NavLink to="/notes" style={linkStyle}>
+            My Notes
           </NavLink>
           {isAdmin && (
             <NavLink to="/users" style={linkStyle}>
