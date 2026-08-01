@@ -36,7 +36,16 @@ export default function Modal({ title, onClose, children, width = 480 }) {
             borderBottom: '1px solid var(--border-hairline-soft)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, margin: 0 }}>{title}</h2>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 17,
+              fontWeight: 700,
+              margin: 0,
+            }}
+          >
+            {title}
+          </h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -53,7 +62,13 @@ export default function Modal({ title, onClose, children, width = 480 }) {
             ×
           </button>
         </div>
-        <div style={{ padding: 22 }}>{children}</div>
+        <div
+          style={{
+            padding: 22,
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
