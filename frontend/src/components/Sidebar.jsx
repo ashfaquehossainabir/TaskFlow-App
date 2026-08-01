@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
 
       <aside className={`sidebar${isOpen ? ' sidebar-open' : ''}`}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 26px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 26px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <div
               style={{
@@ -67,7 +67,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </button>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <nav className="sidebar-nav" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <NavLink to="/" end style={linkStyle}>
             Overview
           </NavLink>
@@ -101,7 +101,7 @@ export default function Sidebar({ isOpen, onClose }) {
           )}
         </nav>
 
-        <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border-hairline-soft)' }}>
+        <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border-hairline-soft)', flexShrink: 0 }}>
           <ActiveTimerBar />
           <div style={{ marginBottom: 10 }}>
             <ThemeToggle />
@@ -197,6 +197,18 @@ export default function Sidebar({ isOpen, onClose }) {
           height: 100vh;
           position: sticky;
           top: 0;
+          overflow: hidden;
+        }
+        .sidebar-nav {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding-right: 2px;
+          scrollbar-width: thin;
+        }
+        .sidebar-nav::-webkit-scrollbar {
+          width: 6px;
         }
         .sidebar-close-btn {
           display: none;
