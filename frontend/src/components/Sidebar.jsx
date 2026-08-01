@@ -206,9 +206,21 @@ export default function Sidebar({ isOpen, onClose }) {
           overflow-x: hidden;
           padding-right: 2px;
           scrollbar-width: thin;
+          scrollbar-color: var(--border-hairline) transparent;
         }
         .sidebar-nav::-webkit-scrollbar {
           width: 6px;
+          height: 6px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+          background: var(--border-hairline);
+          border-radius: 10px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+          background: var(--text-muted);
         }
         .sidebar-close-btn {
           display: none;
