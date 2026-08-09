@@ -1,6 +1,7 @@
 # TaskFlow — Project & Task Management System
 
 A full-stack task/project tracker built with **React (Vite)**, **Express**, and **MongoDB**.
+Developed By Ashfaque Hossain Abir
 
 - Role-based auth (**Admin / Manager / Employee**) with JWT
 - Admin dashboard: create users, create & assign tasks, edit/delete anything
