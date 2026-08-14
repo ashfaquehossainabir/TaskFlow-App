@@ -36,16 +36,38 @@ const CARDS = [
 
 export default function StatsCards({ stats, loading, onCardClick }) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-        gap: 12,
-        marginBottom: 28,
-      }}
-    >
+    <div className="stat-cards-grid">
       <style>{`
+        .stat-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 16px;
+          margin-bottom: 28px;
+        }
+        /* Laptop */
+        @media (max-width: 1200px) {
+          .stat-cards-grid {
+            gap: 14px;
+          }
+        }
+        /* Tablet */
+        @media (max-width: 900px) {
+          .stat-cards-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+          }
+        }
+        /* Mobile */
+        @media (max-width: 560px) {
+          .stat-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+          }
+        }
+
         .stat-card {
+          display: flex;
+          flex-direction: column;
           transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
         .stat-card:hover {
@@ -61,9 +83,30 @@ export default function StatsCards({ stats, loading, onCardClick }) {
         .stat-card:hover .stat-card-value {
           color: var(--glow);
         }
+        .stat-card:hover .stat-card-icon-chip {
+          background: var(--glow);
+          color: var(--text-on-accent);
+        }
         @media (prefers-reduced-motion: reduce) {
           .stat-card { transition: none; }
           .stat-card:hover { transform: none; }
+        }
+
+        .stat-card-head {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+        .stat-card-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          line-height: 1.3;
+          padding-top: 2px;
         }
         .stat-card-icon-chip {
           width: 34px;
@@ -74,18 +117,40 @@ export default function StatsCards({ stats, loading, onCardClick }) {
           justify-content: center;
           background: color-mix(in srgb, var(--glow) 16%, transparent);
           color: var(--glow);
-          margin-bottom: 12px;
           flex-shrink: 0;
+          transition: background 0.18s ease, color 0.18s ease;
         }
-        @media (max-width: 480px) {
-          .stat-card-icon-chip {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 8px;
-          }
-          .stat-card-icon-chip svg {
-            width: 16px;
-            height: 16px;
+        .stat-card-value {
+          font-size: 30px;
+          font-weight: 600;
+          color: var(--text-primary);
+          line-height: 1.1;
+          transition: color 0.18s ease;
+        }
+
+        /* Laptop */
+        @media (max-width: 1200px) {
+          .stat-card { padding: 16px 16px 14px; }
+          .stat-card-value { font-size: 26px; }
+        }
+        /* Tablet */
+        @media (max-width: 900px) {
+          .stat-card { padding: 15px 15px 13px; }
+          .stat-card-head { margin-bottom: 14px; }
+          .stat-card-icon-chip { width: 30px; height: 30px; }
+          .stat-card-value { font-size: 24px; }
+        }
+        /* Mobile */
+        @media (max-width: 560px) {
+          .stat-card { padding: 13px 13px 12px; }
+          .stat-card-head { margin-bottom: 10px; }
+          .stat-card-label { font-size: 10.5px; }
+          .stat-card-icon-chip { width: 26px; height: 26px; border-radius: var(--radius-sm); }
+          .stat-card-value { font-size: 20px; }
+        }
+        @media (max-width: 380px) {
+          .stat-cards-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -119,30 +184,15 @@ export default function StatsCards({ stats, loading, onCardClick }) {
                 transition: 'width 0.18s ease, box-shadow 0.18s ease',
               }}
             />
-            <div className="stat-card-icon-chip">
-              <Icon size={18} strokeWidth={2.25} />
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                marginBottom: 10,
-              }}
-            >
-              {c.label}
+            <div className="stat-card-head">
+              <div className="stat-card-label">{c.label}</div>
+              <div className="stat-card-icon-chip">
+                <Icon size={17} strokeWidth={2.25} />
+              </div>
             </div>
             <div
               className="mono stat-card-value"
               title={loading ? undefined : exactCount(stats?.[c.key] ?? 0)}
-              style={{
-                fontSize: 30,
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                transition: 'color 0.18s ease',
-              }}
             >
               {loading ? '—' : formatCount(stats?.[c.key] ?? 0)}
             </div>
