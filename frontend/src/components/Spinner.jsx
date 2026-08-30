@@ -47,7 +47,7 @@ export default function Spinner({ size = 'md', label, fullpage = false, inline =
     <div className="tf-spinner-stack">
       {brandedMark}
       <span className="tf-brand-word">TaskFlow</span>
-      {label && <span className="tf-spinner-label">{label}</span>}
+      <span className="tf-brand-bar"><span /></span>
     </div>
   ) : (
     <div className="tf-spinner-stack">
@@ -158,6 +158,26 @@ export default function Spinner({ size = 'md', label, fullpage = false, inline =
           opacity: 0;
           animation: tf-boot-word-in 0.5s ease 0.1s forwards;
         }
+        .tf-brand-bar {
+          display: block;
+          width: 120px;
+          height: 3px;
+          border-radius: 3px;
+          background: var(--border-hairline-soft);
+          overflow: hidden;
+        }
+        .tf-brand-bar span {
+          display: block;
+          height: 100%;
+          width: 40%;
+          border-radius: 3px;
+          background: linear-gradient(90deg, var(--accent-cyan), var(--status-progress));
+          animation: tf-brand-bar-sweep 1.15s ease-in-out infinite;
+        }
+        @keyframes tf-brand-bar-sweep {
+          0% { transform: translateX(-120%); }
+          100% { transform: translateX(340%); }
+        }
         @keyframes tf-brand-pulse {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.08); }
@@ -178,7 +198,8 @@ export default function Spinner({ size = 'md', label, fullpage = false, inline =
           .tf-spinner,
           .tf-brand-ring,
           .tf-brand-glow,
-          .tf-brand-logo {
+          .tf-brand-logo,
+          .tf-brand-bar span {
             animation-duration: 1.8s;
           }
           .tf-spinner-fullpage {
