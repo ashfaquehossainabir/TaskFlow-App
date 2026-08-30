@@ -139,11 +139,7 @@ export default function Spinner({ size = 'md', label, fullpage = false, inline =
           font-weight: 700;
           font-size: 17px;
           color: var(--text-on-accent);
-          box-shadow: 0 0 24px -4px var(--accent-cyan);
           animation: tf-brand-pulse 1.8s ease-in-out infinite;
-        }
-        [data-theme='light'] .tf-brand-logo {
-          box-shadow: 0 4px 18px -4px rgba(23, 31, 39, 0.35);
         }
         .tf-brand-word {
           font-family: var(--font-display);
